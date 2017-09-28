@@ -49,14 +49,14 @@ class Song implements Serializable{
 		duration = c;
 	}
 
-	public String getName(){
+	public String getNameSong(){
 		return this.name;
 	}
 
 	@Override
 	public boolean equals(Object o){
 		Song oo = (Song) o;
-		return oo.getName().equals(name);
+		return oo.getNameSong().equals(name);
 	}
 
 
@@ -67,10 +67,22 @@ class Song implements Serializable{
 }
 
 class Playlist implements Serializable{
-	List<Song> l;
+	private List<Song> l;
+	private String name;
 
-	public Playlist(){
+
+	public Playlist(String name){
 		l = new LinkedList<Song>();
+		this.name = name;
+	}
+
+
+	public String getNamePlaylist(){
+		return name;
+	}
+
+	public int getNumSongs(){
+		return l.size();
 	}
 
 	public void addSong(Song newSong){
@@ -92,6 +104,7 @@ class Playlist implements Serializable{
 		
 		try{
 			l.remove(search(name));
+			System.out.println(l.size());
 		}
 		catch(SongNotFoundException e){
 			System.out.println(e);
@@ -134,63 +147,152 @@ class App{
 		System.out.println("3. Search");
 		System.out.println("4. Show");
 		System.out.println("5. Back to Menu");
-		System.out.println("6. Exit");
+		System.out.println("6. Exit the App");
 	}
 
+
+	static void serialize(Playlist p) throws IOException{
+		ObjectOutputStream out = null;
+		try{
+			
+			out = new ObjectOutputStream(new FileOutputStream(String.valueOf(p.getNamePlaylist())+".txt"));
+			out.writeObject(p);
+		}
+		finally{
+			out.close();
+		}
+
+	}
+
+	public static Playlist deserialize(String name) throws IOException, ClassNotFoundException {
+		ObjectInputStream in = null;
+		try{
+			in = new ObjectInputStream(new FileInputStream(name+".txt"));
+			return (Playlist) in.readObject();
+		}
+		finally{
+			in.close();
+		}
+	}
+
+	static void menu(){
+		System.out.println("Enter an option");
+		System.out.println("1. Go to playlist");
+		System.out.println("2. Know number of songs in a playlist");
+		System.out.println("3. Exit the App");
+		System.out.println("4. Create a playlist");
+
+
+	}
 
 	public static void main(String[] args) throws Exception {
 	Reader rd = new Reader();
-	Playlist p = new Playlist();
-
+	
 
 	Song z;
 	String l;
-	while(true){
-		dispOptions();
-	int s = rd.nextInt();
-	switch(s){
-		case 1: 
-		{
-			l = rd.next();
-			String[] ar = l.split(" ");
-			z = new Song(ar[0], ar[1], ar[2]);
-			p.addSong(z);
-			break;
-		}
-		case 2:
-		{
-			l = rd.next();
-			p.delSong(l);
-			break;
+	Playlist p;
 
+
+	while(true){
+		menu();
+		int c = rd.nextInt();
+		switch(c){
+
+		case 1:
+		{
+			System.out.println("Enter name of the playlist");
+			l = rd.next();
+
+			try{
+			p = deserialize(l);
+
+			boolean b = true;
+			while(b){
+			dispOptions();
+			int s = rd.nextInt();
+			switch(s){
+			case 1: 
+			{
+				l = rd.next();
+				String[] ar = l.split(" ");
+				z = new Song(ar[0], ar[1], ar[2]);
+				p.addSong(z);
+				serialize(p);
+				break;
+			}
+			case 2:
+			{
+				l = rd.next();
+				p.delSong(l);
+
+				serialize(p);
+				break;
+
+			}
+			case 3:{
+				l = rd.next();
+				try{
+					System.out.println(p.search(l));
+				}
+				catch(SongNotFoundException e){
+					System.out.println(e);
+
+				}
+				break;
+
+			}
+			case 4:{
+				p.show();
+				break;
+			}
+			case 5: 
+			{b=false;
+			break;}
+			case 6: System.exit(0);
+			}
+			}
 		}
-		case 3:{
+			catch(NullPointerException e){
+				System.out.println("No such playlist!");
+			}
+			break;
+		}
+
+		case 2: {
+			System.out.println("Enter name of the playlist");
 			l = rd.next();
 			try{
-				System.out.println(p.search(l));
-			}
-			catch(SongNotFoundException e){
-				System.out.println(e);
-
+			p = deserialize(l);
+			System.out.println(p.getNumSongs());}
+			catch(NullPointerException e){
+				System.out.println("No such playlist!");
 			}
 			break;
 
 		}
-		case 4:{
-			p.show();
-			break;
+
+		case 3: System.exit(0);
+
+		case 4: {
+			System.out.println("Enter name of the playlist");
+			l = rd.next();
+			Playlist newPlaylist = new Playlist(l);
+			serialize(newPlaylist);
+
 		}
-		case 5:
-		case 6: System.exit(0);
+
+		}
+
 	}
-}
 
 
 
 
-	
+
 		
-	}
-	
+			
+		}
+		
 
-}
+	}
