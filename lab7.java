@@ -61,12 +61,13 @@ class Song implements Serializable{
 
 
 	public String toString(){
-		return name+" "+singer+" "+duration;
+		return "Song's name: "+name+", Singer: "+singer+", Duration: "+duration+"s";
 		}
 
 }
 
 class Playlist implements Serializable{
+	private	static	final long serialVersionUID	=42L;	
 	private List<Song> l;
 	private String name;
 
@@ -87,7 +88,7 @@ class Playlist implements Serializable{
 
 	public void addSong(Song newSong){
 		l.add(newSong);
-		System.out.println(l.size());
+		System.out.println("Total number of songs in the playlist are now "+l.size());
 	}
 
 	public Song search(String name) throws SongNotFoundException{
@@ -104,7 +105,7 @@ class Playlist implements Serializable{
 		
 		try{
 			l.remove(search(name));
-			System.out.println(l.size());
+			System.out.println("Total number of songs in the playlist are now "+l.size());
 		}
 		catch(SongNotFoundException e){
 			System.out.println(e);
@@ -113,15 +114,19 @@ class Playlist implements Serializable{
 	}
 
 
-	public void show(){
+	public String show(){
+		String out = "";
+
 		if(l.size()!=0){
 			for(int i=0 ; i<l.size(); i++){
-				System.out.println(l.get(i));
+				out+=((i+1)+". "+l.get(i)+"\n");
 			}
 
 		}
-		else
-			System.out.println("No Songs Exist");
+		else{
+			out = "No Songs Exist\n";
+		}
+		return out;
 
 	}
 
@@ -131,6 +136,8 @@ class Playlist implements Serializable{
 }
 
 class SongNotFoundException extends Exception{
+
+	private	static	final long serialVersionUID	=41L;	
 	public SongNotFoundException(String message){
         super(message);
     }
@@ -214,23 +221,33 @@ class App{
 			switch(s){
 			case 1: 
 			{
-				l = rd.next();
-				String[] ar = l.split(" ");
-				z = new Song(ar[0], ar[1], ar[2]);
+				System.out.println("Enter name of the song");
+				String newSong = rd.next();
+				System.out.println("Enter name of the singer");
+				String newSinger = rd.next();
+				System.out.println("Enter duration of the song");
+				String newDuration = rd.next();
+
+				z = new Song(newSong, newSinger, newDuration);
 				p.addSong(z);
 				serialize(p);
+				System.out.println();
 				break;
 			}
 			case 2:
 			{
+				System.out.println("Enter the name of the song to be deleted");
 				l = rd.next();
 				p.delSong(l);
 
 				serialize(p);
+
+				System.out.println();
 				break;
 
 			}
 			case 3:{
+				System.out.println("Enter the name of the song to be searched");
 				l = rd.next();
 				try{
 					System.out.println(p.search(l));
@@ -239,15 +256,20 @@ class App{
 					System.out.println(e);
 
 				}
+
+				System.out.println();
 				break;
 
 			}
 			case 4:{
-				p.show();
+				System.out.println(p.show());
+
+			
 				break;
 			}
 			case 5: 
 			{b=false;
+
 			break;}
 			case 6: System.exit(0);
 			}
@@ -256,6 +278,8 @@ class App{
 			catch(NullPointerException e){
 				System.out.println("No such playlist!");
 			}
+
+				System.out.println();
 			break;
 		}
 
@@ -268,11 +292,14 @@ class App{
 			catch(NullPointerException e){
 				System.out.println("No such playlist!");
 			}
+
+				System.out.println();
 			break;
 
 		}
 
 		case 3: System.exit(0);
+		break;
 
 		case 4: {
 			System.out.println("Enter name of the playlist");
@@ -280,7 +307,10 @@ class App{
 			Playlist newPlaylist = new Playlist(l);
 			serialize(newPlaylist);
 
+
+				System.out.println();
 		}
+
 
 		}
 
